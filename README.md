@@ -1,2 +1,5 @@
-# discbot
-A Discord bot that can play music in voice channels.
+# restapi
+Generic RESTful API
+
+# Usage
+Takes in one parameter, which is the server that will host it API
