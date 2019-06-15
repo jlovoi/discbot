@@ -1,6 +1,7 @@
 package main
 
 import (
+  "bufio"
   "log"
   "os"
 	"github.com/gorilla/mux"
@@ -8,6 +9,7 @@ import (
 	"encoding/json"
 	"math/rand"
 	"strconv"
+  "strings"
 )
 
 // Data struct with just an id and a body tag
@@ -84,6 +86,24 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(dataset)
 }
 
+
+func userListen() {
+  scanner := bufio.NewScanner(os.Stdin)
+  for scanner.Scan() {
+    text := scanner.Text()
+    s := strings.Split(text, " ")
+
+    switch s[0] {
+    case "exit":
+      os.Exit(0)
+
+    default:
+      log.Println(text)
+    }
+  }
+}
+
+
 func main() {
 
 	if len(os.Args) < 2 || len(os.Args) > 2 {
@@ -93,12 +113,8 @@ func main() {
   fs := http.FileServer(http.Dir("static"))
   http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-
-
 	domain := os.Args[1]
-
 	router := mux.NewRouter()
-
 	dataset = append(dataset, Data{ID: "1", Body: "First Post Body"})
 
 	// Here are our 5 basic endpoints for the data.
@@ -114,6 +130,6 @@ func main() {
   router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
 
   log.Println("Listening...")
-	http.ListenAndServe(domain, router)
-
+  go userListen()
+  http.ListenAndServe(domain, router)
 }
