@@ -1,26 +1,34 @@
 package main
 
 import (
-  "bufio"
-  "log"
-  "os"
-	"github.com/gorilla/mux"
-	"net/http"
+	"bufio"
 	"encoding/json"
+	"log"
 	"math/rand"
+	"net/http"
+	"os"
 	"strconv"
-  "strings"
+	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 // Data struct with just an id and a body tag
 // This assumes that we will be encoding our data using json
 type Data struct {
-	ID string `json:"id"`
+	ID   string `json:"id"`
 	Body string `json:"body"`
 }
 
-var dataset []Data
-
+var dataset = []Data{
+	Data{"1", "bruh.mp3"},
+	Data{"2", "theWATCH.mp3"},
+	Data{"3", "haroldthealien.mp3"},
+	Data{"4", "schmeat.mp3"},
+	Data{"5", "distortedbass.mp3"},
+	Data{"6", "yeet.mp3"},
+	Data{"7", "whoadance.mp3"},
+	Data{"8", "goodolerub.mp3"}}
 
 func getPosts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -43,7 +51,6 @@ func getPost(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(&Data{})
 }
 
-
 func createPost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	var data Data
@@ -52,7 +59,6 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	dataset = append(dataset, data)
 	json.NewEncoder(w).Encode(&data)
 }
-
 
 func updatePost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -72,7 +78,6 @@ func updatePost(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(dataset)
 }
 
-
 func deletePost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	parameters := mux.Vars(r)
@@ -86,23 +91,21 @@ func deletePost(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(dataset)
 }
 
-
 func userListen() {
-  scanner := bufio.NewScanner(os.Stdin)
-  for scanner.Scan() {
-    text := scanner.Text()
-    s := strings.Split(text, " ")
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		text := scanner.Text()
+		s := strings.Split(text, " ")
 
-    switch s[0] {
-    case "exit":
-      os.Exit(0)
+		switch s[0] {
+		case "exit":
+			os.Exit(0)
 
-    default:
-      log.Println(text)
-    }
-  }
+		default:
+			log.Println(text)
+		}
+	}
 }
-
 
 func main() {
 
@@ -110,26 +113,26 @@ func main() {
 		log.Println("Usage: ./restapi <address>")
 	}
 
-  fs := http.FileServer(http.Dir("static"))
-  http.Handle("/static/", http.StripPrefix("/static/", fs))
+	fs := http.FileServer(http.Dir("static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	domain := os.Args[1]
 	router := mux.NewRouter()
-	dataset = append(dataset, Data{ID: "1", Body: "First Post Body"})
+	// dataset = append(dataset, Data{ID: "1", Body: "First Post Body"})
 
 	// Here are our 5 basic endpoints for the data.
 	// If an incoming request URL matches one of the paths, the corresponding handler
 	// is called passing (http.ResponseWriter, *http.Request) as parameters.
-	router.HandleFunc("/dataset", getPosts).Methods("GET")
-	router.HandleFunc("/dataset", createPost).Methods("POST")
-	router.HandleFunc("/dataset/{id}", getPost).Methods("GET")
-	router.HandleFunc("/dataset/{id}", updatePost).Methods("PUT")
-	router.HandleFunc("/dataset/{id}", deletePost).Methods("DELETE")
+	router.HandleFunc("/sounds", getPosts).Methods("GET")
+	router.HandleFunc("/sounds", createPost).Methods("POST")
+	router.HandleFunc("/sounds/{id}", getPost).Methods("GET")
+	router.HandleFunc("/sounds/{id}", updatePost).Methods("PUT")
+	router.HandleFunc("/sounds/{id}", deletePost).Methods("DELETE")
 
-  // Now to serve static files:
-  router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
+	// Now to serve static files:
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
 
-  log.Println("Listening...")
-  go userListen()
-  http.ListenAndServe(domain, router)
+	log.Println("Listening...")
+	go userListen()
+	http.ListenAndServe(domain, router)
 }
