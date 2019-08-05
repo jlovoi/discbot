@@ -116,7 +116,6 @@ func main() {
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	domain := os.Args[1]
 	router := mux.NewRouter()
 	// dataset = append(dataset, Data{ID: "1", Body: "First Post Body"})
 
@@ -134,5 +133,5 @@ func main() {
 
 	log.Println("Listening...")
 	go userListen()
-	http.ListenAndServe(domain, router)
+	http.ListenAndServe(":8080", router)
 }
